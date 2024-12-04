@@ -13,7 +13,7 @@ namespace Ug.Usecase
         private IRequest _request = default!;
         private IPresenter _presenter = default!;
 
-        public abstract void Execute();
+        public abstract Task Execute();
 
         public IUsecase WithRequest(IRequest request)
         {

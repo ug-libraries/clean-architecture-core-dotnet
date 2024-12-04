@@ -200,10 +200,10 @@ request.ToArray() // request payload as dictionary
 }
 
 // get request fields
-var param1Value = request.Get("param1"); // value1
-var param5Value = request.Get("param2.param4.param5"); // nested params (5)
-var unKnownParams = request.Get("param2.unkownParams"); // return null if not exists (null)
-var othersUnKnownParams = request.Get("param2.unkownParams", 4); // return param2.unkownParams value if exists or return 4 if not exists 
+var param1Value = request.Get<string>("param1"); // value1
+var param5Value = request.Get<int>("param2.param4.param5"); // nested params (5)
+var unKnownParams = request.Get<object>("param2.unkownParams"); // return null if not exists (null)
+var othersUnKnownParams = request.Get<int>("param2.unkownParams", 4); // return param2.unkownParams value if exists or return 4 if not exists 
 ```
 
 #### Exceptions handling
@@ -323,7 +323,7 @@ public class AppUsecase : Usecase
 {
     // you can add constructor here with usecase dependencies
     
-    public override void Execute()
+    public override Task Execute()
     {
         PresentResponse(
             Response.Create(
@@ -336,6 +336,7 @@ public class AppUsecase : Usecase
                 }
             )
         );
+        return Task.CompletedTask;
     }
 }
 ```
@@ -402,6 +403,15 @@ usecase
     .Execute();
 
 // you can not call PresentResponse method into the usecase.
+// If you throw an exception into the usecase
+var exception = await Assert.ThrowsAsync<ContactListAlreadyExistsException>(async () =>
+{
+    await _usecase
+        .WithRequest(_request.CreateFromPayload(payload))
+        .WithPresenter(_presenter)
+        .Execute();
+});
+Dictionary<string, object> errors = exception.Format();
 ```
 
 ## License

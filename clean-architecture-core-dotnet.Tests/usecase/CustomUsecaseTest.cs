@@ -114,7 +114,7 @@ namespace Ug.Tests.Usecase
 
         private class CustomUsecaseWithoutErrors : BaseUsecase.Usecase
         {
-            public override void Execute()
+            public override Task Execute()
             {
                 PresentResponse(
                     Ug.Response.Response.Create(
@@ -127,12 +127,14 @@ namespace Ug.Tests.Usecase
                         }
                     )
                 );
+
+                return Task.CompletedTask;
             }
         }
 
         private class CustomUsecaseWithErrors : BaseUsecase.Usecase
         {
-            public override void Execute()
+            public override Task Execute()
             {
                 throw new BadRequestContentException(
                 new Dictionary<string, object>

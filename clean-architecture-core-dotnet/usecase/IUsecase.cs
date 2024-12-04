@@ -9,7 +9,7 @@ namespace Ug.Usecase
 {
     public interface IUsecase
     {
-        void Execute();
+        Task Execute();
 
         IUsecase WithRequest(IRequest request);
 
