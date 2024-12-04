@@ -2,48 +2,56 @@
 // Copyright (c) Ulrich Geraud AHOGLA. All rights reserved.
 // </copyright>
 
-namespace Ug.Usecase;
-
 using Ug.Response;
 using Ug.Request;
 using Ug.Presenter;
 
-public abstract class Usecase : IUsecase
+namespace Ug.Usecase
 {
-    private IRequest request = default!;
-    private IPresenter presenter = default!;
-
-    public abstract void Execute();
-
-    public IUsecase WithRequest(IRequest request)
+    public abstract class Usecase : IUsecase
     {
-        this.request = request;
-        return this;
-    }
+        private IRequest _request = default!;
+        private IPresenter _presenter = default!;
 
-    public IUsecase WithPresenter(IPresenter presenter)
-    {
-        this.presenter = presenter;
-        return this;
-    }
+        public abstract void Execute();
 
-    protected void PresentResponse(IResponse response)
-    {
-        this.presenter.Present(response);
-    }
+        public IUsecase WithRequest(IRequest request)
+        {
+            _request = request;
+            return this;
+        }
 
-    protected Dictionary<string, object> GetRequestData()
-    {
-        return this.request.ToArray();
-    }
+        public IUsecase WithPresenter(IPresenter presenter)
+        {
+            _presenter = presenter;
+            return this;
+        }
 
-    protected string GetRequestId()
-    {
-        return this.request.GetRequestId();
-    }
+        protected void PresentResponse(IResponse response)
+        {
+            _presenter.Present(response);
+        }
 
-    protected object GetField(string fieldName, object? defaultValue = null)
-    {
-        return this.request.Get(fieldName, defaultValue);
+        protected Dictionary<string, object> GetRequestData()
+        {
+            return _request.ToArray();
+        }
+
+        protected string GetRequestId()
+        {
+            return _request.GetRequestId();
+        }
+
+        protected T GetField<T>(string fieldName, object? defaultValue = null)
+        {
+            var value = _request.Get<T>(fieldName, defaultValue);
+
+            if (value == null && defaultValue == null)
+            {
+                return default!;
+            }
+
+            return value ?? (T)defaultValue!;
+        }
     }
 }

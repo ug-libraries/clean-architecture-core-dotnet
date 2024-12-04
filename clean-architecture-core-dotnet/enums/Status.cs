@@ -24,10 +24,5 @@ namespace Ug.Enums
                     throw new ArgumentOutOfRangeException();
             }
         }
-
-        public static string ToStringValue(this Status status)
-        {
-            return status.GetValue();
-        }
     }
 }

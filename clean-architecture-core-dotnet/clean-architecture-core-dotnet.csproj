@@ -5,7 +5,7 @@
     <RootNamespace>Ug</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
     <Authors>Ulrich Geraud AHOGLA</Authors>
     <Description>A simple library to implement clean architecture in c# project.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>

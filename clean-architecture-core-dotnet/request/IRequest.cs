@@ -2,15 +2,16 @@
 // Copyright (c) Ulrich Geraud AHOGLA. All rights reserved.
 // </copyright>
 
-namespace Ug.Request;
-
-public interface IRequest
+namespace Ug.Request
 {
-    IRequest CreateFromPayload(Dictionary<string, object> payload);
+    public interface IRequest
+    {
+        IRequest CreateFromPayload(Dictionary<string, object> payload);
 
-    string GetRequestId();
+        string GetRequestId();
 
-    Dictionary<string, object> ToArray();
+        Dictionary<string, object> ToArray();
 
-    object? Get(string fieldName, object? defaultValue = null);
+        public T? Get<T>(string fieldName, object? defaultValue = null);
+    }
 }

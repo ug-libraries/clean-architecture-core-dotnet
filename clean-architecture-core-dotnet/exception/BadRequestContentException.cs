@@ -2,14 +2,16 @@
 // Copyright (c) Ulrich Geraud AHOGLA. All rights reserved.
 // </copyright>
 
-namespace Ug.LibException;
 using Ug.Response;
 
-public class BadRequestContentException : BaseException
+namespace Ug.LibException
 {
-    protected override int errorCode { get; } = StatusCode.BadRequest.GetValue();
-    public BadRequestContentException(Dictionary<string, object> errors)
-        : base(errors)
+    public class BadRequestContentException : BaseException
     {
+        protected override int errorCode { get; } = StatusCode.BadRequest.GetValue();
+        public BadRequestContentException(Dictionary<string, object> errors)
+            : base(errors)
+        {
+        }
     }
 }

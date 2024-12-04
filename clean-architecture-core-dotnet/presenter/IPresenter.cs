@@ -2,15 +2,16 @@
 // Copyright (c) Ulrich Geraud AHOGLA. All rights reserved.
 // </copyright>
 
-namespace Ug.Presenter;
-
 using Ug.Response;
 
-public interface IPresenter
+namespace Ug.Presenter
 {
-    void Present(IResponse response);
+    public interface IPresenter
+    {
+        void Present(IResponse response);
 
-    IResponse GetResponse();
+        IResponse GetResponse();
 
-    Dictionary<string, object> GetFormattedResponse();
+        Dictionary<string, object> GetFormattedResponse();
+    }
 }

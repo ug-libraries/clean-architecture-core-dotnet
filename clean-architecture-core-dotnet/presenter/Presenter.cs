@@ -2,26 +2,27 @@
 // Copyright (c) Ulrich Geraud AHOGLA. All rights reserved.
 // </copyright>
 
-namespace Ug.Presenter;
-
 using Ug.Response;
 
-public abstract class Presenter : IPresenter
+namespace Ug.Presenter
 {
-    protected IResponse response = default!;
-
-    public void Present(IResponse response)
+    public abstract class Presenter : IPresenter
     {
-        this.response = response;
-    }
+        protected IResponse _response = default!;
 
-    public IResponse GetResponse()
-    {
-        return this.response;
-    }
+        public void Present(IResponse response)
+        {
+            _response = response;
+        }
 
-    public Dictionary<string, object> GetFormattedResponse()
-    {
-        return this.response.Output();
+        public IResponse GetResponse()
+        {
+            return _response;
+        }
+
+        public Dictionary<string, object> GetFormattedResponse()
+        {
+            return _response.Output();
+        }
     }
 }

@@ -4,91 +4,98 @@
 
 using Ug.Enums;
 
-namespace Ug.Response;
-
-public class Response : IResponse
+namespace Ug.Response
 {
-    private readonly bool success;
-    private readonly int statusCode;
-    private readonly string message;
-    private readonly Dictionary<string, object> data;
-
-    public Response(bool success, int statusCode, string message, Dictionary<string, object> data)
+    public class Response : IResponse
     {
-        this.success = success;
-        this.statusCode = statusCode;
-        this.message = message;
-        this.data = data ?? new Dictionary<string, object>();
-    }
+        private readonly bool _success;
+        private readonly int _statusCode;
+        private readonly string _message;
+        private readonly Dictionary<string, object> _data;
 
-    public static Response Create(bool success, int statusCode, string message, Dictionary<string, object> data)
-    {
-        return new Response(success, statusCode, message, data);
-    }
-
-    public bool IsSuccess()
-    {
-        return this.success;
-    }
-
-    public int GetStatusCode()
-    {
-        return this.statusCode;
-    }
-
-    public string GetMessage()
-    {
-        return this.message;
-    }
-
-    public Dictionary<string, object> GetData()
-    {
-        return this.data;
-    }
-
-    public object? Get(string fieldName)
-    {
-        object? value = this.data;
-        foreach (var key in fieldName.Split('.'))
+        public Response(bool success, int statusCode, string message, Dictionary<string, object> data)
         {
-            if (value is not Dictionary<string, object> map || !map.TryGetValue(key, out var tempValue))
+            _success = success;
+            _statusCode = statusCode;
+            _message = message;
+            _data = data ?? new Dictionary<string, object>();
+        }
+
+        public static Response Create(bool success, int statusCode, string message, Dictionary<string, object> data)
+        {
+            return new Response(success, statusCode, message, data);
+        }
+
+        public bool IsSuccess()
+        {
+            return _success;
+        }
+
+        public int GetStatusCode()
+        {
+            return _statusCode;
+        }
+
+        public string GetMessage()
+        {
+            return _message;
+        }
+
+        public Dictionary<string, object> GetData()
+        {
+            return _data;
+        }
+
+        public T? Get<T>(string fieldName)
+        {
+            object? value = _data;
+
+            foreach (var key in fieldName.Split('.'))
             {
-                return null;
+                if (value is not Dictionary<string, object> map || !map.TryGetValue(key, out var tempValue))
+                {
+                    return default;
+                }
+
+                value = tempValue;
             }
 
-            value = tempValue;
+            if (value is T typedValue)
+            {
+                return typedValue;
+            }
+
+            return default;
         }
 
-        return value;
-    }
-
-    public Dictionary<string, object> Output()
-    {
-        var output = new Dictionary<string, object>
+        public Dictionary<string, object> Output()
         {
-            { "status", this.GetStatusLabel() },
-            { "code", this.statusCode },
-            { "message", this.message },
-        };
+            var output = new Dictionary<string, object>
+            {
+                { "status", GetStatusLabel() },
+                { "code", _statusCode },
+                { "message", _message },
+            };
 
-        foreach (var entry in this.MapDataKeyAccordingToResponseStatus())
-        {
-            output[entry.Key] = entry.Value;
+            foreach (var entry in MapDataKeyAccordingToResponseStatus())
+            {
+                output[entry.Key] = entry.Value;
+            }
+
+            return output;
         }
 
-        return output;
-    }
-
-    private string GetStatusLabel()
-    {
-        return this.success ? Status.Success.GetValue() : Status.Error.GetValue();
-    }
-
-    private IEnumerable<KeyValuePair<string, object>> MapDataKeyAccordingToResponseStatus()
-    {
-        return new Dictionary<string, object>
+        private string GetStatusLabel()
         {
-            { this.IsSuccess() ? "data" : "details", this.GetData() },
-        };
+            return _success ? Status.Success.GetValue() : Status.Error.GetValue();
+        }
+
+        private IEnumerable<KeyValuePair<string, object>> MapDataKeyAccordingToResponseStatus()
+        {
+            return new Dictionary<string, object>
+            {
+                { IsSuccess() ? "data" : "details", GetData() },
+            };
+        }
     }
 }

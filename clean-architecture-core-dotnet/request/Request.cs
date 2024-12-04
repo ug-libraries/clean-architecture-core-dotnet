@@ -2,90 +2,94 @@
 // Copyright (c) Ulrich Geraud AHOGLA. All rights reserved.
 // </copyright>
 
-namespace Ug.Request;
-
 using Ug.LibException;
 
-public abstract class Request : RequestFilter, IRequest
+namespace Ug.Request
 {
-    protected string requestId = default!;
-    protected Dictionary<string, object> requestParams = new Dictionary<string, object>();
 
-    public IRequest CreateFromPayload(Dictionary<string, object> payload)
+    public abstract class Request : RequestFilter, IRequest
     {
-        var requestValidationResult = this.RequestPayloadFilter(payload);
-        this.ThrowMissingFieldsExceptionIfNeeded((Dictionary<string, string>)requestValidationResult["missing_fields"]);
-        this.ThrowUnRequiredFieldsExceptionIfNeeded((List<string>)requestValidationResult["unauthorized_fields"]);
-        
-        this.ApplyConstraintsOnRequestFields(payload);
-        
-        this.requestId = Guid.NewGuid().ToString();
-        this.requestParams = payload;
+        private string _requestId = default!;
+        private Dictionary<string, object> _requestParams = new();
 
-        return this;
-    }
-
-    protected void ThrowMissingFieldsExceptionIfNeeded(Dictionary<string, string> missingFields)
-    {
-        if (missingFields.Any())
+        public IRequest CreateFromPayload(Dictionary<string, object> payload)
         {
-            throw new BadRequestContentException(new Dictionary<string, object>
-            {
-                { "message", "missing.required.fields" },
-                { "details", new Dictionary<string, object> { { "missing_fields", missingFields } } },
-            });
+            var requestValidationResult = RequestPayloadFilter(payload);
+            ThrowMissingFieldsExceptionIfNeeded((Dictionary<string, string>)requestValidationResult["missing_fields"]);
+            ThrowUnRequiredFieldsExceptionIfNeeded((List<string>)requestValidationResult["unauthorized_fields"]);
+            
+            ApplyConstraintsOnRequestFields(payload);
+            
+            _requestId = Guid.NewGuid().ToString();
+            _requestParams = payload;
+
+            return this;
         }
-    }
 
-    protected void ThrowUnRequiredFieldsExceptionIfNeeded(List<string> unauthorizedFields)
-    {
-        if (unauthorizedFields.Any())
+        protected void ThrowMissingFieldsExceptionIfNeeded(Dictionary<string, string> missingFields)
         {
-            throw new BadRequestContentException(new Dictionary<string, object>
+            if (missingFields.Any())
             {
-                { "message", "illegal.fields" },
-                { "details", new Dictionary<string, object> { { "unrequired_fields", unauthorizedFields } } },
-            });
-        }
-    }
-
-    protected virtual void ApplyConstraintsOnRequestFields(Dictionary<string, object> requestData)
-    {
-        // To be implemented by subclasses if necessary.
-    }
-
-    public string GetRequestId()
-    {
-        return this.requestId;
-    }
-
-    public Dictionary<string, object> ToArray()
-    {
-        return this.requestParams;
-    }
-
-    public object? Get(string fieldName, object? defaultValue = null)
-    {
-        object? data = this.requestParams;
-        foreach (var key in fieldName.Split('.'))
-        {
-            if (data is not Dictionary<string, object> dataMap)
-            {
-                return defaultValue;
-            }
-
-            if (!dataMap.ContainsKey(key))
-            {
-                return defaultValue;
-            }
-
-            data = dataMap[key];
-            if (data == null)
-            {
-                return defaultValue;
+                throw new BadRequestContentException(new Dictionary<string, object>
+                {
+                    { "message", "missing.required.fields" },
+                    { "details", new Dictionary<string, object> { { "missing_fields", missingFields } } },
+                });
             }
         }
 
-        return data;
+        protected void ThrowUnRequiredFieldsExceptionIfNeeded(List<string> unauthorizedFields)
+        {
+            if (unauthorizedFields.Any())
+            {
+                throw new BadRequestContentException(new Dictionary<string, object>
+                {
+                    { "message", "illegal.fields" },
+                    { "details", new Dictionary<string, object> { { "unrequired_fields", unauthorizedFields } } },
+                });
+            }
+        }
+
+        protected virtual void ApplyConstraintsOnRequestFields(Dictionary<string, object> requestData)
+        {
+            // To be implemented by subclasses if necessary.
+        }
+
+        public string GetRequestId()
+        {
+            return _requestId;
+        }
+
+        public Dictionary<string, object> ToArray()
+        {
+            return _requestParams;
+        }
+
+        public T? Get<T>(string fieldName, object? defaultValue = null)
+        {
+            object? data = _requestParams;
+
+            foreach (var key in fieldName.Split('.'))
+            {
+                if (data is not Dictionary<string, object> dataMap)
+                {
+                    return (T?)defaultValue;
+                }
+
+                if (!dataMap.TryGetValue(key, out var value))
+                {
+                    return (T?)defaultValue;
+                }
+
+                data = value;
+            }
+
+            if (data is T typedData)
+            {
+                return typedData;
+            }
+
+            return (T?)defaultValue;
+        }
     }
 }
